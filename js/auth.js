@@ -14,9 +14,10 @@ document.getElementById("loginBtn").addEventListener("click", () => {
 
   signInWithEmailAndPassword(auth, email, password)
     .then(() => {
-      loginForm.style.display = "none";
-      dashboard.style.display = "block";
-    })
+  loginForm.style.display = "none";
+  dashboard.style.display = "block";
+  listenToSensors();
+})
     .catch(err => {
       alert("Login gagal: " + err.message);
     });
