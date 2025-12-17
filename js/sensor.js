@@ -2,15 +2,15 @@ import { db } from "./firebase-config.js";
 import { ref, onValue } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 export function listenToSensors() {
-  const sensorRef = ref(db, "greenhouse/sensors");
+  const sensorRef = ref(db, "iot");
 
   onValue(sensorRef, (snapshot) => {
-    const d = snapshot.val() || {};
+  const d = snapshot.val() || {};
 
-    updateSoil(d.soil);
-    updateLight(d.ldr);
-    updateMotion(d.pir);
-  });
+  updateSoil(d.soil);
+  updateLight(d.ldr);
+  updateMotion(d.pir);
+});
 }
 
 function updateSoil(value) {
