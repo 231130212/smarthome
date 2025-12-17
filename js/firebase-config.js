@@ -1,9 +1,7 @@
-// Import Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-// Konfigurasi Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBWykaVcM4DaQ-XBfF6CLQXoX2bfi96Cto",
   authDomain: "minggu11-d956b.firebaseapp.com",
@@ -14,7 +12,7 @@ const firebaseConfig = {
   appId: "1:920306875576:web:be1bd99efda2a8aedc884d"
 };
 
-// Init Firebase
 const app = initializeApp(firebaseConfig);
+
 export const auth = getAuth(app);
 export const db = getDatabase(app);
