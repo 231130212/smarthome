@@ -1,53 +1,43 @@
 #include <WiFi.h>
 #include <Firebase_ESP_Client.h>
 
-/* ================= WIFI ================= */
-const char* ssid = "NAMA_WIFI";
-const char* password = "PASSWORD_WIFI";
+const char* ssid = "negromoves";      
+const char* password = "hhannalizu1337"; 
 
-/* ================= FIREBASE ================= */
-#define API_KEY "AIzaSyBWykaVcM4DaQ-XBfF6CLQXoX2bfi96Cto"
-#define DATABASE_URL "https://minggu11-d956b-default-rtdb.firebaseio.com/"
-#define USER_EMAIL "emailfirebase@gmail.com"
-#define USER_PASSWORD "passwordfirebase"
+#define API_KEY "APIFirebaseAnda"        
+#define DATABASE_URL "https://project-anda-id.firebasedatabase.app/"
+#define USER_EMAIL "yeyo@gmail.com" 
+#define USER_PASSWORD "yeyo12"         
 
-/* ================= PIN ================= */
-#define LDR_PIN 19
-#define SOIL_PIN 18
-#define PIR_PIN 23
+#define dht 23
+#define ldr 19
+#define soil 18
 
-FirebaseData fbdo;
-FirebaseAuth auth;
-FirebaseConfig config;
-
-/* ================= SETUP ================= */
 void setup() {
   Serial.begin(115200);
-  delay(1000);
+  delay(100);
   Serial.println("\n=== SMART PLANT GREENHOUSE ===");
   Serial.println("Inisialisasi sistem...\n");
 
-  // Pin modes
   pinMode(LDR_PIN, INPUT);
   pinMode(SOIL_PIN, INPUT);
   pinMode(PIR_PIN, INPUT);
+  pinMode(FLAME_PIN, INPUT);
+  pinMode(OBJECT_PIN, INPUT);
 
-  // Connect WiFi
-  WiFi.begin(ssid, password);
-  Serial.print("Menghubungkan WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
-    delay(500);
-  }
-  Serial.println("\nWiFi Terhubung!");
-  Serial.println(WiFi.localIP());
+  connectWiFi();
 
-  // Firebase config
-  config.api_key = API_KEY;
-  config.database_url = DATABASE_URL;
-  auth.user.email = USER_EMAIL;
-  auth.user.password = USER_PASSWORD;
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  Serial.println("Sinkronisasi waktu dengan NTP...");
+  delay(2000);
 
+  config.api_key = AIzaSyBWykaVcM4DaQ-XBfF6CLQXoX2bfi96Cto;
+  config.database_url = https://minggu11-d956b-default-rtdb.firebaseio.com/;
+  auth.user.email = yeyo@gmail.com;
+  auth.user.password = yeyo12;
+  config.token_status_callback = tokenStatusCallback;
+
+  Serial.println("Menghubungkan ke Firebase...");
   Firebase.begin(&config, &auth);
   Firebase.reconnectWiFi(true);
 
@@ -58,29 +48,41 @@ void setup() {
   }
 
   if (Firebase.ready()) {
-    Serial.println("\n✔ Firebase terhubung");
-    Serial.println("✔ Sistem siap monitoring\n");
+    Serial.println("\n✓ Firebase terhubung");
+    Serial.println("✓ Sistem siap monitoring!\n");
   } else {
-    Serial.println("\n✖ Firebase gagal terhubung, sistem tetap berjalan\n");
+    Serial.println("\n✗ Firebase gagal terhubung, sistem tetap berjalan...\n");
   }
 }
 
-/* ================= LOOP ================= */
+
 void loop() {
-  // Cek koneksi WiFi
   if (WiFi.status() != WL_CONNECTED) {
     Serial.println("WiFi terputus! Mencoba reconnect...");
-    WiFi.begin(ssid, password);
+    connectWiFi();
   }
 
-  int soil = analogRead(SOIL_PIN);
-  int light = analogRead(LDR_PIN);
-  int motion = digitalRead(PIR_PIN);
+  unsigned long now = millis();
+  if (now - lastSensorUpdate > sensorInterval) {
+    lastSensorUpdate = now;
+    bacaDanKirimData();
+  }
+}
 
-  Firebase.RTDB.setInt(&fbdo, "greenhouse/sensors/soilMoisture", soil);
-  Firebase.RTDB.setInt(&fbdo, "greenhouse/sensors/lightLevel", light);
-  Firebase.RTDB.setBool(&fbdo, "greenhouse/sensors/motion", motion);
-
-  Serial.println("Data terkirim ke Firebase");
-  delay(3000);
+void connectWiFi() {
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+  Serial.print("Menghubungkan ke WiFi");
+  unsigned long start = millis();
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(500);
+    if (millis() - start > 20000) {
+      Serial.println("\n✗ Gagal terhubung WiFi - restart...");
+      ESP.restart();
+    }
+  }
+  Serial.println();
+  Serial.println("✓ WiFi Terhubung!");
+  Serial.print("IP Address: ");
+  Serial.println(WiFi.localIP());
 }
